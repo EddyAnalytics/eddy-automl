@@ -3,7 +3,8 @@ services:
   eddy-automl:
     build: .
     image: eddy-automl:latest
-    working_dir: /home/jovyan/work
+    depends_on: 
+      - broker
     ports:
       - 8888:8888
     environment: 
