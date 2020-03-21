@@ -3,16 +3,15 @@ services:
   eddy-automl:
     build: .
     image: eddy-automl:latest
-    depends_on: 
-      - broker
     ports:
       - 8888:8888
     environment: 
       - JUPYTER_ENABLE_LAB=yes
-    working_dir: /home/jovyan/work
+      - BOOTSTRAP_SERVER=broker:29092
+    working_dir: /home/jovyan/work/app/
     volumes: 
-      - ./main.py:/home/jovyan/work/main.py
-  
+      - ./app:/home/jovyan/work/app/
+
   # Kafka Cluster
   zookeeper:
     image: confluentinc/cp-zookeeper:5.3.1

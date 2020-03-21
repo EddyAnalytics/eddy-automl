@@ -1,4 +1,5 @@
 import sys
+from automlstreams.streams import KafkaStream
 from automlstreams.meta import MetaClassifier
 from skmultiflow.trees import HoeffdingTree
 from skmultiflow.evaluation import EvaluatePrequential
@@ -7,16 +8,18 @@ from io import StringIO
 import pandas as pd
 import numpy as np
 
-def run_indefinetly(broker, input_topic, output_topic, target_index, model=HoeffdingTree()):
-    print(f'Running AutoML for input_topic={input_topic}, output_topic={output_topic} and broker={broker}')
+from config import *
+
+def run_indefinetly(input_topic, output_topic, target_index, model=HoeffdingTree()):
+    print(f'Running AutoML for input_topic={input_topic}, output_topic={output_topic} and broker={BOOTSTRAP_SERVERS}.')
     consumer = KafkaConsumer(
             input_topic,
-            bootstrap_servers=broker,
+            bootstrap_servers=BOOTSTRAP_SERVERS,
             group_id=None,
             auto_offset_reset='earliest',
             value_deserializer=lambda x: x.decode('utf-8')
         )
-    producer = KafkaProducer(value_serializer=lambda x: x.encode('utf-8'))
+    producer = KafkaProducer(bootstrap_servers=BOOTSTRAP_SERVERS, value_serializer=lambda x: x.encode('utf-8'))
 
     i = 0
     total_predictions = 0
@@ -42,7 +45,7 @@ def run_indefinetly(broker, input_topic, output_topic, target_index, model=Hoeff
                 correct_predictions += 1
             accuracy = correct_predictions / total_predictions
             print(f'Accuracy at sample {i}: {accuracy}')
-            producer.send(output_topic + '_accuracy', str(accuracy))
+            producer.send(output_topic + '__accuracy', str(accuracy))
             producer.flush()
         except Exception:
             pass
@@ -65,13 +68,12 @@ def run_indefinetly(broker, input_topic, output_topic, target_index, model=Hoeff
 
 if __name__ == "__main__":
     try:
-        broker = sys.argv[1]
-        input_topic = sys.argv[2]
-        output_topic = sys.argv[3]
-        target_index = int(sys.argv[4])
+        input_topic = sys.argv[1]
+        output_topic = sys.argv[2]
+        target_index = int(sys.argv[3])
 
-        run_indefinetly(broker, input_topic, output_topic, target_index)
+        run_indefinetly(input_topic, output_topic, target_index)
     except IndexError:
-        raise SystemExit(f"Usage: {sys.argv[0]} broker input_topic output_topic target_index")
+        raise SystemExit(f"Usage: {sys.argv[0]} input_topic output_topic target_index")
 
 
