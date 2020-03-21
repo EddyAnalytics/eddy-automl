@@ -1,18 +1,13 @@
 import sys
-from automlstreams.meta import LastBestClassifier
+from automlstreams.meta import MetaClassifier
+from skmultiflow.trees import HoeffdingTree
 from skmultiflow.evaluation import EvaluatePrequential
 from kafka import KafkaConsumer, KafkaProducer
 from io import StringIO
 import pandas as pd
 import numpy as np
 
-from random import random
-
-from skmultiflow.trees import HoeffdingTree
-
-DEFAULT_BROKER = 'localhost:9092'
-
-def run_indefinetly(input_topic, output_topic, target_index, broker=DEFAULT_BROKER, model=HoeffdingTree()):
+def run_indefinetly(input_topic, output_topic, target_index, broker, model=HoeffdingTree()):
     print(f'Running AutoML for input_topic={input_topic}, output_topic={output_topic} and broker={broker}')
     consumer = KafkaConsumer(
             input_topic,
@@ -70,10 +65,11 @@ def run_indefinetly(input_topic, output_topic, target_index, broker=DEFAULT_BROK
 
 if __name__ == "__main__":
     try:
-        input_topic = sys.argv[1]
-        output_topic = sys.argv[2]
-        target_index = int(sys.argv[3])
+        broker = sys.argv[1]
+        input_topic = sys.argv[2]
+        output_topic = sys.argv[3]
+        target_index = int(sys.argv[4])
     except IndexError:
-        raise SystemExit(f"Usage: {sys.argv[0]} input_topic output_topic target_index")
+        raise SystemExit(f"Usage: {sys.argv[0]} broker input_topic output_topic target_index")
 
-    run_indefinetly(input_topic, output_topic, target_index)
+
