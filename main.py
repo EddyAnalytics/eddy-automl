@@ -23,25 +23,41 @@ def run_indefinetly(input_topic, output_topic, target_index, broker=DEFAULT_BROK
         )
     producer = KafkaProducer(value_serializer=lambda x: x.encode('utf-8'))
 
+    i = 0
     total_predictions = 0
     correct_predictions = 0
     accuracy = 0
 
     for message in consumer:
         sample = pd.read_csv(StringIO(message.value), header=None)
+        i += 1
 
         if any(sample.dtypes == 'object'):
             print(f'Streamed sample contains text or malformatted data.')
             continue
-    
+        
         X = sample.iloc[:,:target_index]
         y = sample.iloc[:,target_index]
+
+        # Collect metrics
+        try:
+            prediction = model.predict(X)
+            total_predictions += 1
+            if prediction[0] == y[0]:
+                correct_predictions += 1
+            accuracy = correct_predictions / total_predictions
+            print(f'Accuracy at sample {i}: {accuracy}')
+            producer.send(output_topic + '_accuracy', str(accuracy))
+            producer.flush()
+        except Exception:
+            pass
 
         if y.isnull().any():
             # Predict
             try:
                 y_pred = pd.DataFrame(model.predict(X))
                 producer.send(output_topic, y_pred.to_csv(header=False, index=False))
+                producer.flush()
             except Exception as e:
                 print('An exception occured during prediction', e)
         else:
