@@ -7,7 +7,7 @@ from io import StringIO
 import pandas as pd
 import numpy as np
 
-def run_indefinetly(input_topic, output_topic, target_index, broker, model=HoeffdingTree()):
+def run_indefinetly(broker, input_topic, output_topic, target_index, model=HoeffdingTree()):
     print(f'Running AutoML for input_topic={input_topic}, output_topic={output_topic} and broker={broker}')
     consumer = KafkaConsumer(
             input_topic,
@@ -69,6 +69,8 @@ if __name__ == "__main__":
         input_topic = sys.argv[2]
         output_topic = sys.argv[3]
         target_index = int(sys.argv[4])
+
+        run_indefinetly(broker, input_topic, output_topic, target_index)
     except IndexError:
         raise SystemExit(f"Usage: {sys.argv[0]} broker input_topic output_topic target_index")
 
