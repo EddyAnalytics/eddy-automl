@@ -9,6 +9,9 @@ services:
       - 8888:8888
     environment: 
       - JUPYTER_ENABLE_LAB=yes
+    working_dir: /home/jovyan/work
+    volumes: 
+      - ./main.py:/home/jovyan/work/main.py
   
   # Kafka Cluster
   zookeeper:
