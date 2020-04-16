@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build Docker image
-        run: docker build ./demo/Dockerfile -t eddyanalytics/eddy-automl-demo-datasets
+        run: docker build ./demo/ -t eddyanalytics/eddy-automl-demo-datasets
       - name: Push Docker image
         run: |
           echo '${{ secrets.CI_REGISTRY_TOKEN }}' | docker login --username eddyanalytics --password-stdin
