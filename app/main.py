@@ -11,7 +11,7 @@ import numpy as np
 from config import *
 
 def run_indefinetly(input_topic, output_topic, target_index, model=HoeffdingTree()):
-    print(f'Running AutoML for input_topic={input_topic}, output_topic={output_topic} and broker={BOOTSTRAP_SERVERS}.')
+    print(f'Running AutoML for input_topic={input_topic}, output_topic={output_topic}, target_index={target_index} and broker={BOOTSTRAP_SERVERS}.')
     consumer = KafkaConsumer(
             input_topic,
             bootstrap_servers=BOOTSTRAP_SERVERS,
@@ -46,6 +46,7 @@ def run_indefinetly(input_topic, output_topic, target_index, model=HoeffdingTree
             accuracy = correct_predictions / total_predictions
             print(f'Accuracy at sample {i}: {accuracy}')
             producer.send(output_topic + '__accuracy', str(accuracy))
+            producer.send(output_topic + '__pred_count', str(total_predictions))
             producer.flush()
         except Exception:
             pass
